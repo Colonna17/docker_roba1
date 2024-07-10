@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.6.0-cudnn8-runtime-ubuntu20.04
+FROM nvidia/cuda:11.6.1-devel-ubuntu20.04
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install python3 python3-pip ffmpeg libsm6 libxext6 -y
 
