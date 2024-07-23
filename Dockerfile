@@ -18,13 +18,26 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
 # Installa Miniconda
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda.sh && \
-    bash /miniconda.sh -b -p /opt/conda && \
-    rm /miniconda.sh && \
-    /opt/conda/bin/conda clean -tipsy && \
-    ln -s /opt/conda/bin/conda /usr/local/bin/conda && \
-    ln -s /opt/conda/bin/python /usr/local/bin/python && \
-    ln -s /opt/conda/bin/pip /usr/local/bin/pip
+# Install wget to fetch Miniconda
+RUN apt-get update && \
+    apt-get install -y wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Miniconda on x86 or ARM platforms
+RUN arch=$(uname -m) && \
+    if [ "$arch" = "x86_64" ]; then \
+    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"; \
+    elif [ "$arch" = "aarch64" ]; then \
+    MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh"; \
+    else \
+    echo "Unsupported architecture: $arch"; \
+    exit 1; \
+    fi && \
+    wget $MINICONDA_URL -O miniconda.sh && \
+    mkdir -p /root/.conda && \
+    bash miniconda.sh -b -p /root/miniconda3 && \
+    rm -f miniconda.sh
 
 # Aggiorna Conda
 RUN conda update -n base -c defaults conda
